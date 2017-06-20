@@ -1,0 +1,25 @@
+server:
+  port: 8080
+  contextPath: /api/v1/air
+  
+logging:
+  file: air-manifest-log
+  
+dynamodb:
+  region: us-east-1
+
+#TODO: figure out why I need this here and in bootstrap.yml
+spring:
+  application:
+    name: ManifestApplication
+
+ribbon:
+  ServerListRefreshInterval: 1000
+
+endpoints:
+  health:
+    sensitive: false
+  restart:
+    enabled: true
+  shutdown:
+    enabled: true
