@@ -1,0 +1,29 @@
+version: 0.1
+
+phases:
+
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - $(aws ecr get-login --region us-east-1)
+      
+  build:
+    commands:
+      - docker info
+      - echo Building the Docker image started on 'date'...          
+      - docker build -t csra/air-manifest-micro .
+      - echo Build of docker image completed on 'date'. Listing docker images
+      - docker images
+      - echo Tagging image
+      - docker tag csra/air-manifest-micro:latest 373434647164.dkr.ecr.us-east-1.amazonaws.com/csra/air-manifest-micro:latest 
+      - echo Tagging complete
+      
+  post_build:
+    commands:
+      - echo Pushing the Docker image...
+      - docker push 373434647164.dkr.ecr.us-east-1.amazonaws.com/csra/air-manifest-micro:latest
+
+artifacts:
+  files:
+    - target/air-manifest-micro-0.1.0.jar
+  discard-paths: yes

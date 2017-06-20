@@ -1,0 +1,1749 @@
+<?xml version="1.0" encoding="UTF-8"?><xsd:schema targetNamespace="http://ace.cbp.gov/eis/edi/air/camir/1.0" xmlns="http://ace.cbp.gov/eis/edi/air/camir/1.0" xmlns:dfdl="http://www.ogf.org/dfdl/dfdl-1.0/" xmlns:fn="http://www.w3.org/2005/xpath-functions" xmlns:ibmDfdlExtn="http://www.ibm.com/dfdl/extensions" xmlns:ibmEdiFmt="http://www.ibm.com/dfdl/EDI/Format" xmlns:ibmSchExtn="http://www.ibm.com/schema/extensions" xmlns:recSepFieldsFmt="http://www.ibm.com/dfdl/RecordSeparatedFieldFormat" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+	<xsd:import namespace="http://www.ibm.com/dfdl/RecordSeparatedFieldFormat" schemaLocation="../IBMdefined/RecordSeparatedFieldFormat.xsd"/>
+	<xsd:import namespace="http://www.ibm.com/dfdl/EDI/Format" schemaLocation="../TRUCK/EDIFACT/IBM_EDI_Format.xsd"/>
+
+
+                                                	        <xsd:complexType name="txtInfoOptionalComplexType">
+    <xsd:sequence dfdl:separator="/">
+      <xsd:element dfdl:representation="text" name="desc" type="xsd:string"/>
+      <xsd:element dfdl:representation="text" minOccurs="0" name="optDesc" type="xsd:string"/>
+    </xsd:sequence>
+  </xsd:complexType>
+    <xsd:complexType name="txtInfoComplexType">
+    <xsd:sequence dfdl:separator="%CR;%LF;/">
+      <xsd:element dfdl:representation="text" maxOccurs="1" name="txtInfo" type="xsd:string"/>
+                <xsd:element dfdl:representation="text" maxOccurs="unbounded" minOccurs="0" name="optInfo" type="txtInfoOptionalComplexType"/>
+        </xsd:sequence>
+  </xsd:complexType>
+    <xsd:complexType name="terminatorComplexType">
+    <xsd:sequence dfdl:initiator="">
+      <xsd:element dfdl:initiator="" dfdl:representation="text" dfdl:terminator="%ETX;" minOccurs="0" name="filler" type="xsd:string">
+        <xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:assert message="Must be less than 2 chars in case of duplicate arrs">{fn:string-length(.) le 2}</dfdl:assert>
+          </xsd:appinfo>
+        </xsd:annotation>
+      </xsd:element>
+                <xsd:element dfdl:representation="text" minOccurs="0" name="filler2" type="xsd:string">
+        <xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:assert message="Must be less 3 chars for duplicate arrs">{fn:string-length(.) le 3}</dfdl:assert>
+          </xsd:appinfo>
+        </xsd:annotation>
+      </xsd:element>
+        </xsd:sequence>
+  </xsd:complexType>
+    <xsd:complexType name="fsnInboundBodyComplexType">
+    <xsd:sequence dfdl:terminator="">
+      <xsd:element dfdl:representation="text" dfdl:terminator="%CR;%LF;" name="messageType" type="xsd:string"/>
+      <xsd:element dfdl:representation="text" name="cargoControlLine" type="cclComplexType"/>
+      <xsd:element dfdl:representation="text" name="airWayBill" type="awbComplexType"/>
+      <xsd:element dfdl:representation="text" name="arrival" type="arrOtherComplexType"/>
+      <xsd:element dfdl:representation="text" name="airLineStatusNotification" type="asnComplexType"/>
+                <xsd:element dfdl:representation="text" minOccurs="0" name="terminator" type="terminatorComplexType"/>
+        </xsd:sequence>
+  </xsd:complexType>
+  
+   <xsd:complexType name="fsnOutboundBodyComplexType">
+    <xsd:sequence dfdl:terminator="%ETX;">
+      <xsd:element dfdl:representation="text" dfdl:terminator="%CR;%LF;" name="messageType" type="xsd:string"/>
+      <xsd:element dfdl:representation="text" name="cargoControlLine" type="cclComplexType"/>
+      <xsd:element dfdl:representation="text" name="airWayBill" type="awbComplexType"/>
+      <xsd:element dfdl:representation="text" name="arrival" type="arrOtherComplexType"/>
+      <xsd:element dfdl:representation="text" name="cbpStatusNotification" type="csnComplexType"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  
+    <xsd:complexType name="asnComplexType">
+    <xsd:sequence dfdl:terminator="%CR;%LF;">
+      <xsd:element dfdl:length="3" dfdl:lengthKind="explicit" dfdl:representation="text" name="segmentId">
+        <xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:assert message="Must be ASN">{. eq 'ASN'}</dfdl:assert>
+          </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+            <xsd:minLength value="3"/>
+            <xsd:maxLength value="3"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:element>
+      <xsd:element dfdl:length="1" dfdl:lengthKind="explicit" dfdl:representation="text" name="statusCode">
+                        <xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:assert message="Must be 3, 4, 6, or 7">{. eq '3' or . eq '4' or . eq '6' or . eq '7'}</dfdl:assert>
+          </xsd:appinfo>
+        </xsd:annotation>
+                <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="1"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:element>
+      <xsd:element dfdl:representation="text" minOccurs="0" name="actionExplanation">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="20"/>
+            <xsd:pattern value="\w{1,20}"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+    <xsd:complexType name="fsiBodyComplexType">
+    <xsd:sequence dfdl:terminator="%ETX;">
+      <xsd:element dfdl:representation="text" dfdl:terminator="%CR;%LF;" name="messageType" type="xsd:string"/>
+      <xsd:element dfdl:representation="text" name="cargoControlLine" type="cclComplexType"/>
+      <xsd:element dfdl:representation="text" name="airWayBill" type="awbComplexType"/>
+      <xsd:element dfdl:representation="text" name="arrival" type="arrOtherComplexType"/>
+      <xsd:element dfdl:representation="text" name="cbpStatusNotification" type="csnComplexType"/>
+    </xsd:sequence>
+  </xsd:complexType>
+    <xsd:complexType name="entryTypeAndNumberComplexType">
+    <xsd:sequence>
+      <xsd:element dfdl:length="2" dfdl:lengthKind="explicit" dfdl:representation="text" name="entryType">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+            <xsd:minLength value="2"/>
+            <xsd:maxLength value="2"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:element>
+      <xsd:element dfdl:representation="text" name="entryNumber" type="xsd:string"/>
+    </xsd:sequence>
+  </xsd:complexType>
+    <xsd:complexType name="transactionDateTimeComplexType">
+    <xsd:sequence>
+      <xsd:element dfdl:length="5" dfdl:lengthKind="explicit" dfdl:representation="text" name="transactionDate" type="xsd:string"/>
+      <xsd:element dfdl:length="4" dfdl:lengthKind="explicit" dfdl:representation="text" name="transactionTime">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+            <xsd:minLength value="4"/>
+            <xsd:maxLength value="4"/>
+            <xsd:pattern value="\d{4}"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+    <xsd:complexType name="actionCodePiecesComplexType">
+    <xsd:sequence dfdl:separator="-">
+      <xsd:element dfdl:representation="text" name="actionCode" type="xsd:string"/>
+      <xsd:element dfdl:representation="text" dfdl:textNumberPattern="#0" name="pieces" type="xsd:integer"/>
+    </xsd:sequence>
+  </xsd:complexType>
+    <xsd:complexType name="csnComplexType">
+    <xsd:sequence dfdl:separator="/" dfdl:terminator="%CR;%LF;">
+      <xsd:element dfdl:representation="text" name="segmentId" type="xsd:string">
+        <xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:assert message="Must be CSN">{. eq 'CSN'}</dfdl:assert>
+          </xsd:appinfo>
+        </xsd:annotation>
+      </xsd:element>
+                <xsd:element dfdl:representation="text" name="actionPieces" type="actionCodePiecesComplexType"/>
+            <xsd:element dfdl:representation="text" name="transactionDateTime" type="transactionDateTimeComplexType"/>
+            <xsd:element dfdl:representation="text" minOccurs="0" name="entryTypeAndNumber" type="xsd:string"/>
+            <xsd:element dfdl:representation="text" minOccurs="0" name="remarks" type="xsd:string"/>
+        </xsd:sequence>
+  </xsd:complexType>
+    <xsd:complexType name="txtComplexType">
+    <xsd:sequence dfdl:separator="/" dfdl:terminator="%CR;%LF;">
+      <xsd:element dfdl:representation="text" name="segmentId" type="xsd:string">
+      <xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:assert message="Must be TXT">{. eq 'TXT'}</dfdl:assert>
+          </xsd:appinfo>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element dfdl:representation="text" name="information" type="txtInfoComplexType"/>
+    </xsd:sequence>
+  </xsd:complexType>
+    <xsd:complexType name="fscBodyComplexType">
+    <xsd:sequence dfdl:terminator="%ETX;">
+      <xsd:element dfdl:representation="text" dfdl:terminator="%CR;%LF;" name="messageType" type="xsd:string"/>
+      <xsd:element dfdl:representation="text" minOccurs="0" name="cargoControlLine" type="cclComplexType">
+       
+                      <xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:discriminator message="">{(fn:string-length(./airport ) eq 3) and(fn:string-length(./terminal ) le 4)}</dfdl:discriminator>
+          </xsd:appinfo>
+        </xsd:annotation>
+            </xsd:element>
+                  <xsd:element dfdl:representation="text" name="airWayBill" type="awbOtherComplexType"/>
+            <xsd:element dfdl:representation="text" minOccurs="0" name="arrival" type="arrOtherComplexType">
+        <xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:discriminator>{./segmentId eq 'ARR'}</dfdl:discriminator>
+          </xsd:appinfo>
+        </xsd:annotation>
+      </xsd:element>
+            <xsd:element dfdl:representation="text" name="freightStatusCondition" type="fscComplexType"/>
+                                <xsd:element dfdl:representation="text" maxOccurs="10" minOccurs="0" name="text" type="txtComplexType">
+        <xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:discriminator>{./segmentId eq 'TXT'}</dfdl:discriminator>
+          </xsd:appinfo>
+        </xsd:annotation>
+      </xsd:element>
+                                    <xsd:element dfdl:representation="text" minOccurs="0" name="wayBill" type="wblComplexType">
+        <xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:discriminator>{./segmentId eq 'WBL'}</dfdl:discriminator>
+          </xsd:appinfo>
+        </xsd:annotation>
+      </xsd:element>
+                                                                                    <xsd:element dfdl:representation="text" minOccurs="0" name="secondArrival" type="arrComplexType">
+        <xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:discriminator>{./segmentId eq 'ARR'}</dfdl:discriminator>
+          </xsd:appinfo>
+        </xsd:annotation>
+      </xsd:element>
+            <xsd:element dfdl:representation="text" maxOccurs="2" minOccurs="0" name="transfer" type="trnComplexType">
+        <xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:discriminator>{./segmentId eq 'TRN'}</dfdl:discriminator>
+          </xsd:appinfo>
+        </xsd:annotation>
+      </xsd:element>
+                            </xsd:sequence>
+  </xsd:complexType>
+    <xsd:complexType name="fscComplexType">
+    <xsd:sequence dfdl:separator="/" dfdl:terminator="%CR;%LF;">
+      <xsd:element dfdl:representation="text" name="segmentId" type="xsd:string">
+        <xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:assert message="Must be FSC">{. eq 'FSC'}</dfdl:assert>
+          </xsd:appinfo>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element dfdl:representation="text" name="statusAnswerCode" type="xsd:string"/>
+    </xsd:sequence>
+  </xsd:complexType>
+    <xsd:complexType name="fsqBodyComplexType">
+    <xsd:sequence dfdl:terminator="">
+      <xsd:element dfdl:representation="text" dfdl:terminator="%CR;%LF;" name="messageType" type="xsd:string"/>
+                  <xsd:element dfdl:representation="text" minOccurs="0" name="cargoControlLine" type="cclComplexType">
+        <xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:discriminator>{(fn:string-length(./airport ) eq 3) and (fn:string-length(./terminal ) le 4)}</dfdl:discriminator>
+          </xsd:appinfo>
+        </xsd:annotation>
+      </xsd:element>
+            <xsd:element dfdl:representation="text" name="airWayBill" type="awbOtherComplexType"/>
+            <xsd:element dfdl:representation="text" name="freightStatusQuery" type="fsqComplexType"/>
+                                            <xsd:element dfdl:representation="text" minOccurs="0" name="terminator" type="terminatorComplexType"/>
+        </xsd:sequence>
+  </xsd:complexType>
+    <xsd:complexType name="fsqComplexType">
+    <xsd:sequence dfdl:separator="/" dfdl:terminator="%CR;%LF;">
+      <xsd:element dfdl:representation="text" name="segmentId" type="xsd:string">
+        <xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:assert message="Must be FSQ">{. eq 'FSQ'}</dfdl:assert>
+          </xsd:appinfo>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element dfdl:representation="text" name="statusRequestCode" type="xsd:string"/>
+    </xsd:sequence>
+  </xsd:complexType>
+    <xsd:complexType name="fdmBodyComplexType">
+    <xsd:sequence dfdl:terminator="">
+      <xsd:element dfdl:representation="text" dfdl:terminator="%CR;%LF;" name="messageType">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+            <xsd:minLength value="3"/>
+            <xsd:maxLength value="3"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:element>
+      <xsd:element dfdl:representation="text" name="departure" type="depComplexType"/>
+                <xsd:element dfdl:representation="text" minOccurs="0" name="terminator" type="terminatorComplexType"/>
+        </xsd:sequence>
+  </xsd:complexType>
+        <xsd:complexType name="depComplexType">
+    <xsd:sequence dfdl:separator="/" dfdl:terminator="%CR;%LF;">
+      <xsd:element dfdl:representation="text" name="segmentId" type="xsd:string">
+        <xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:assert message="Must be DEP">{. eq 'DEP'}</dfdl:assert>
+          </xsd:appinfo>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element dfdl:representation="text" name="carrierAndFlight">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+            <xsd:minLength value="5"/>
+            <xsd:maxLength value="8"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:element>
+      <xsd:element dfdl:representation="text" name="arrivalDate" type="arrivalDateComplexType"/>
+                        <xsd:element dfdl:representation="text" minOccurs="0" name="liftOffData" type="xsd:string"/>
+            <xsd:element dfdl:representation="text" minOccurs="0" name="actualCarrierAndFlight">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+            <xsd:minLength value="5"/>
+            <xsd:maxLength value="8"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:element>
+                        </xsd:sequence>
+  </xsd:complexType>
+    <xsd:complexType name="wblDescriptionAndDate">
+    <xsd:sequence dfdl:separator="/">
+      <xsd:element dfdl:escapeSchemeRef="" dfdl:representation="text" name="description" type="xsd:string"/>
+      <xsd:element dfdl:escapeSchemeRef="" dfdl:representation="text" minOccurs="0" name="date" type="arrivalDateComplexType"/>
+    </xsd:sequence>
+  </xsd:complexType>
+    <xsd:complexType name="rfaComplexType">
+    <xsd:sequence dfdl:separator="/" dfdl:terminator="%CR;%LF;">
+      <xsd:element dfdl:representation="text" name="segmentId" type="xsd:string">
+        <xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:assert message="Must be RFA">{. eq 'RFA'}</dfdl:assert>
+          </xsd:appinfo>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element dfdl:representation="text" name="amndCode">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="01"/>
+            <xsd:enumeration value="02"/>
+            <xsd:enumeration value="03"/>
+            <xsd:enumeration value="04"/>
+            <xsd:enumeration value="05"/>
+            <xsd:enumeration value="06"/>
+            <xsd:enumeration value="07"/>
+            <xsd:enumeration value="08"/>
+            <xsd:enumeration value="09"/>
+            <xsd:enumeration value="10"/>
+            <xsd:enumeration value="11"/>
+            <xsd:enumeration value="12"/>
+            <xsd:enumeration value="13"/>
+            <xsd:enumeration value="14"/>
+            <xsd:enumeration value="15"/>
+            <xsd:enumeration value="16"/>
+            <xsd:enumeration value="17"/>
+            <xsd:enumeration value="18"/>
+            <xsd:enumeration value="19"/>
+            <xsd:enumeration value="20"/>
+            <xsd:enumeration value="21"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:element>
+      <xsd:element dfdl:representation="text" minOccurs="0" name="amndExplanation">
+                        <xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            
+          </xsd:appinfo>
+        </xsd:annotation>
+                <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+            <xsd:pattern value="\w{1,20}"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+    <xsd:complexType name="cedComplexType">
+    <xsd:sequence dfdl:separator="/" dfdl:terminator="%CR;%LF;">
+                  <xsd:annotation>
+        <xsd:appinfo source="http://www.ogf.org/dfdl/">
+          <dfdl:sequence/>
+        </xsd:appinfo>
+      </xsd:annotation>
+            <xsd:element dfdl:representation="text" name="segmentId" type="xsd:string"/>
+      <xsd:element dfdl:representation="text" name="entryType">
+      <!--  
+        <xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:assert message="Entry type must be 11, 86, 87, 91, 92, 93, 94, 000.">{(. eq '11') or (. eq '86') or (. eq '87') or (. eq '91') or (. eq '92') or (. eq '93') or (. eq '94') or (. eq '000') }</dfdl:assert>
+          </xsd:appinfo>
+        </xsd:annotation>
+        -->
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="11"/>
+            <xsd:enumeration value="86"/>
+            <xsd:enumeration value="87"/>
+            <xsd:enumeration value="91"/>
+            <xsd:enumeration value="92"/>
+            <xsd:enumeration value="93"/>
+            <xsd:enumeration value="94"/>
+            <xsd:enumeration value="000"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:element>
+                      <xsd:element dfdl:representation="text" minOccurs="0" name="entryNumber" type="xsd:string"/>
+        </xsd:sequence>
+  </xsd:complexType>
+    <xsd:complexType name="masterIndOrHawbNumComplexType">
+		<xsd:choice>
+			<xsd:element dfdl:representation="text" name="masterIndicator" type="xsd:string">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator>{. eq 'M'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" name="hawbNum" type="hawbComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator>{./hawbNumber ne 'M' }</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:complexType name="airCamirMessageOutBound">
+		<xsd:sequence>
+			<xsd:element name="outBoundHeader">
+				<xsd:complexType>
+					<xsd:choice>
+						<xsd:element dfdl:representation="text" name="iataHeader" type="iataOutboundHeaderComplexType">
+							<xsd:annotation>
+								<xsd:appinfo source="http://www.ogf.org/dfdl/">
+									<dfdl:discriminator>{fn:starts-with(./originator , 'QK ')}
+									</dfdl:discriminator>
+								</xsd:appinfo>
+							</xsd:annotation>
+						</xsd:element>
+						<xsd:element dfdl:representation="text" name="arIncHeader" type="arIncOutboundHeaderComplexType"/>
+					</xsd:choice>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element dfdl:initiator="%STX;" name="OutboundBody">
+				<xsd:complexType>
+					<xsd:choice>
+						<!-- xsd:element name="member" type="member"/ -->
+						<xsd:element dfdl:representation="text" name="ferBody" type="ferBodyComplexType">
+							<xsd:annotation>
+								<xsd:appinfo source="http://www.ogf.org/dfdl/">
+									<dfdl:discriminator>{./messageType eq 'FER'}
+									</dfdl:discriminator>
+								</xsd:appinfo>
+							</xsd:annotation>
+						</xsd:element>
+						<xsd:element dfdl:representation="text" name="fscBody" type="fscBodyComplexType">
+							<xsd:annotation>
+								<xsd:appinfo source="http://www.ogf.org/dfdl/">
+									<dfdl:discriminator>{./messageType eq 'FSC'}
+									</dfdl:discriminator>
+								</xsd:appinfo>
+							</xsd:annotation>
+						</xsd:element>
+						<xsd:element dfdl:representation="text" name="fsnBody" type="fsnOutboundBodyComplexType">
+							<xsd:annotation>
+								<xsd:appinfo source="http://www.ogf.org/dfdl/">
+									<dfdl:discriminator>{./messageType eq 'FSN'}
+									</dfdl:discriminator>
+								</xsd:appinfo>
+							</xsd:annotation>
+						</xsd:element>
+						<xsd:element name="fsiBody" type="fsiBodyComplexType">
+							<xsd:annotation>
+								<xsd:appinfo source="http://www.ogf.org/dfdl/">
+									<dfdl:discriminator>{./messageType eq 'FSI'}
+									</dfdl:discriminator>
+								</xsd:appinfo>
+							</xsd:annotation>
+						</xsd:element>
+					</xsd:choice>
+				</xsd:complexType>
+			</xsd:element>
+
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="OrigAddressOutBoundComplexType">
+		<xsd:sequence dfdl:separator="%SP;" dfdl:terminator="%CR;%LF;">
+			<xsd:element dfdl:representation="text" name="origAddress">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="1"/>
+						<xsd:maxLength value="8"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" name="timeStamp" type="xsd:string"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:simpleType dfdl:calendarPattern="HHmmss" dfdl:calendarPatternKind="explicit" name="arIncDateTimeSimpleType">
+		<xsd:restriction base="xsd:dateTime"/>
+	</xsd:simpleType>
+	<xsd:simpleType dfdl:calendarPattern="ddHHmmss" dfdl:calendarPatternKind="explicit" name="iataDateTimeSimpleType">
+		<xsd:restriction base="xsd:dateTime"/>
+	</xsd:simpleType>
+	<xsd:complexType name="errorListComplexType">
+		<xsd:sequence dfdl:separator="%CR;%LF;" dfdl:terminator="">
+			<xsd:element dfdl:representation="text" maxOccurs="999" name="errorMessage" type="errComplexType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ferBodyComplexType">
+		<xsd:sequence dfdl:terminator="%CR;%LF;%ETX;">
+			<xsd:element dfdl:representation="text" dfdl:terminator="%CR;%LF;" name="messageType">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:maxLength value="3"/>
+						<xsd:minLength value="3"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" name="errorReportFlight" type="erfComplexType"/>
+			<xsd:element dfdl:representation="text" name="airWayBill" type="awbComplexType"/>
+			<xsd:element dfdl:representation="text" maxOccurs="1" name="errorMessageList" type="errorListComplexType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="errCodeDescComplexType">
+		<xsd:sequence>
+			<xsd:element dfdl:length="3" dfdl:lengthKind="explicit" dfdl:representation="text" name="errorCode" type="xsd:string">
+							</xsd:element>
+			<xsd:element dfdl:representation="text" name="description">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="0"/>
+						<xsd:maxLength value="9999"/>
+											</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="errComplexType">
+		<xsd:sequence dfdl:separator="/" dfdl:terminator="">
+			<xsd:element dfdl:representation="text" name="segmentId">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="3"/>
+						<xsd:maxLength value="3"/>
+						<xsd:pattern value="ERR"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" maxOccurs="1" name="errorCodeDesc" type="errCodeDescComplexType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="erfComplexType">
+		<xsd:sequence dfdl:separator="" dfdl:terminator="%CR;%LF;">
+			<xsd:element dfdl:representation="text" minOccurs="0" name="carrierAndFlight">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="0"/>
+						<xsd:maxLength value="9999"/>
+											</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:initiator="/" dfdl:representation="text" name="dateField" type="arrivalDateSimpleType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="countryPostalPhoneComplexType">
+		<xsd:sequence dfdl:separator="/">
+			<xsd:element dfdl:representation="text" name="country" type="countrySimpleType"/>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="postalCode" type="postalCodeSimpleType"/>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="phoneNumber" type="phoneSimpleType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="cityStateComplexType">
+		<xsd:sequence dfdl:separator="/" dfdl:separatorPolicy="suppressedAtEndLax">
+			<xsd:element dfdl:representation="text" name="city" type="citySimpleType"/>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="state" type="stateSimpleType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="airCamirMessage">
+		<xsd:sequence>
+			<xsd:element dfdl:representation="text" name="airManifestHeader" type="headerComplexType"/>
+			<!-- xsd:element dfdl:initiator="%STX;" name="body" type="friBodyComplexType"/ -->
+			<xsd:element dfdl:initiator="%STX;" name="airManifestBody">
+				<xsd:complexType>
+					<xsd:choice>
+						<xsd:element name="friBody" type="friBodyComplexType">
+							<xsd:annotation>
+								<xsd:appinfo source="http://www.ogf.org/dfdl/">
+									<dfdl:discriminator>{./messageType eq 'FRI'}
+									</dfdl:discriminator>
+								</xsd:appinfo>
+							</xsd:annotation>
+						</xsd:element>
+						<xsd:element name="fxiBody" type="fxiBodyComplexType">
+							<xsd:annotation>
+								<xsd:appinfo source="http://www.ogf.org/dfdl/">
+									<dfdl:discriminator>{./messageType eq 'FXI'}
+									</dfdl:discriminator>
+								</xsd:appinfo>
+							</xsd:annotation>
+						</xsd:element>
+						<xsd:element name="frcBody" type="frcBodyComplexType">
+							<xsd:annotation>
+								<xsd:appinfo source="http://www.ogf.org/dfdl/">
+									<dfdl:discriminator>{./messageType eq 'FRC'}
+									</dfdl:discriminator>
+								</xsd:appinfo>
+							</xsd:annotation>
+						</xsd:element>
+						<xsd:element name="fxcBody" type="fxcBodyComplexType">
+							<xsd:annotation>
+								<xsd:appinfo source="http://www.ogf.org/dfdl/">
+									<dfdl:discriminator>{./messageType eq 'FXC'}
+									</dfdl:discriminator>
+								</xsd:appinfo>
+							</xsd:annotation>
+						</xsd:element>
+						<xsd:element name="frxBody" type="frxBodyComplexType">
+							<xsd:annotation>
+								<xsd:appinfo source="http://www.ogf.org/dfdl/">
+									<dfdl:discriminator>{./messageType eq 'FRX'}
+									</dfdl:discriminator>
+								</xsd:appinfo>
+							</xsd:annotation>
+						</xsd:element>
+						<xsd:element name="fxxBody" type="fxxBodyComplexType">
+							<xsd:annotation>
+								<xsd:appinfo source="http://www.ogf.org/dfdl/">
+									<dfdl:discriminator>{./messageType eq 'FXX'}
+									</dfdl:discriminator>
+								</xsd:appinfo>
+							</xsd:annotation>
+						</xsd:element>
+						<xsd:element name="fdmBody" type="fdmBodyComplexType">
+							<xsd:annotation>
+								<xsd:appinfo source="http://www.ogf.org/dfdl/">
+									<dfdl:discriminator>{./messageType eq 'FDM'}
+									</dfdl:discriminator>
+								</xsd:appinfo>
+							</xsd:annotation>
+						</xsd:element>
+						<xsd:element name="fsqBody" type="fsqBodyComplexType">
+							<xsd:annotation>
+								<xsd:appinfo source="http://www.ogf.org/dfdl/">
+									<dfdl:discriminator>{./messageType eq 'FSQ'}
+									</dfdl:discriminator>
+								</xsd:appinfo>
+							</xsd:annotation>
+						</xsd:element>
+						<xsd:element name="fsnBody" type="fsnInboundBodyComplexType">
+							<xsd:annotation>
+								<xsd:appinfo source="http://www.ogf.org/dfdl/">
+									<dfdl:discriminator>{./messageType eq 'FSN'}
+									</dfdl:discriminator>
+								</xsd:appinfo>
+							</xsd:annotation>
+						</xsd:element>
+						<!-- xsd:element name="member" type="member"/ -->
+						<!-- xsd:element dfdl:representation="text" name="ferBody" type="ferBodyComplexType"> 
+							<xsd:annotation> <xsd:appinfo source="http://www.ogf.org/dfdl/"> <dfdl:discriminator>{./messageType 
+							eq 'FER'} </dfdl:discriminator> </xsd:appinfo> </xsd:annotation> </xsd:element -->
+					</xsd:choice>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="fdaComplexType">
+		<xsd:sequence dfdl:terminator="%CR;%LF;">
+			<xsd:element dfdl:representation="text" name="segmentId">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="3"/>
+						<xsd:maxLength value="3"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="trnAirportComplexType">
+		<xsd:sequence dfdl:separator="-" dfdl:separatorPolicy="suppressedAtEndLax">
+			<xsd:element dfdl:representation="text" name="airportCode">                				
+                <xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="3"/>
+						<xsd:maxLength value="3"/>
+						<xsd:pattern value="[A-Z]{3}|(000)"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="domesticIden">                				
+                                <xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            
+          </xsd:appinfo>
+        </xsd:annotation>
+                <xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="1"/>
+						<xsd:maxLength value="1"/>
+						<xsd:enumeration value="I"/>
+						<xsd:enumeration value="D"/>
+						<xsd:enumeration value="R"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="shipperNameComplexType">
+		<xsd:sequence dfdl:separator="/">
+			<xsd:element dfdl:representation="text" name="segmentId">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="3"/>
+						<xsd:maxLength value="3"/>
+						<xsd:pattern value="(SHP)"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:escapeSchemeRef="" dfdl:representation="text" name="name">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="1"/>
+						<xsd:maxLength value="35"/>
+						<xsd:pattern value="\w{1,35}"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="boardedPieceComplexType">
+		<xsd:sequence>
+			<xsd:element dfdl:length="1" dfdl:lengthKind="explicit" dfdl:representation="text" fixed="B" name="boardedId">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="1"/>
+						<xsd:maxLength value="1"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" name="pieces" type="pieceCountSimpleType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="arrivalSplitComplexType">
+		<xsd:sequence dfdl:separator="-">
+			<xsd:element dfdl:representation="text" name="arrivalDate" type="arrivalDateComplexType"/>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="splitInd" type="xsd:string"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="arrivalDateComplexType">
+		<xsd:sequence>
+			<xsd:element dfdl:length="2" dfdl:lengthKind="explicit" dfdl:representation="text" name="dayOfMonth">
+				<!-- <xsd:annotation> <xsd:appinfo source="http://www.ogf.org/dfdl/"> 
+					<dfdl:assert>{(. eq '01') or (. eq '02') or (. eq '03') or (. eq '04') or 
+					(. eq '05') or (. eq '06') or (. eq '07') or (. eq '08') or (. eq '09') or 
+					(. eq '10') or (. eq '11') or (. eq '12') or (. eq '13') or (. eq '14') or 
+					(. eq '15') or (. eq '16') or (. eq '17') or (. eq '18') or (. eq '19') or 
+					(. eq '20') or (. eq '21') or (. eq '22') or (. eq '23') or (. eq '24') or 
+					(. eq '25') or (. eq '26') or (. eq '27') or (. eq '28') or (. eq '29') or 
+					(. eq '30') or (. eq '31') } </dfdl:assert> </xsd:appinfo> </xsd:annotation> -->
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="2"/>
+						<xsd:maxLength value="2"/>
+						<xsd:enumeration value="01"/>
+						<xsd:enumeration value="02"/>
+						<xsd:enumeration value="03"/>
+						<xsd:enumeration value="04"/>
+						<xsd:enumeration value="05"/>
+						<xsd:enumeration value="06"/>
+						<xsd:enumeration value="07"/>
+						<xsd:enumeration value="08"/>
+						<xsd:enumeration value="09"/>
+						<xsd:enumeration value="10"/>
+						<xsd:enumeration value="11"/>
+						<xsd:enumeration value="12"/>
+						<xsd:enumeration value="13"/>
+						<xsd:enumeration value="14"/>
+						<xsd:enumeration value="15"/>
+						<xsd:enumeration value="16"/>
+						<xsd:enumeration value="17"/>
+						<xsd:enumeration value="18"/>
+						<xsd:enumeration value="19"/>
+						<xsd:enumeration value="20"/>
+						<xsd:enumeration value="21"/>
+						<xsd:enumeration value="22"/>
+						<xsd:enumeration value="23"/>
+						<xsd:enumeration value="24"/>
+						<xsd:enumeration value="25"/>
+						<xsd:enumeration value="26"/>
+						<xsd:enumeration value="27"/>
+						<xsd:enumeration value="28"/>
+						<xsd:enumeration value="29"/>
+						<xsd:enumeration value="30"/>
+						<xsd:enumeration value="31"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" name="month">
+				<!-- <xsd:annotation> <xsd:appinfo source="http://www.ogf.org/dfdl/"> 
+					<dfdl:assert message="Must be first three letters of the month."> {(. eq 
+					'JAN') or (. eq 'FEB') or (. eq 'MAR') or (. eq 'APR') or (. eq 'MAY') or 
+					(. eq 'JUN') or (. eq 'JUL') or (. eq 'AUG') or (. eq 'SEP') or (. eq 'OCT') 
+					or (. eq 'NOV') or (. eq 'DEC') } </dfdl:assert> </xsd:appinfo> </xsd:annotation> -->
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="3"/>
+						<xsd:maxLength value="3"/>
+						<xsd:enumeration value="JAN"/>
+						<xsd:enumeration value="FEB"/>
+						<xsd:enumeration value="MAR"/>
+						<xsd:enumeration value="APR"/>
+						<xsd:enumeration value="MAY"/>
+						<xsd:enumeration value="JUN"/>
+						<xsd:enumeration value="JUL"/>
+						<xsd:enumeration value="AUG"/>
+						<xsd:enumeration value="SEP"/>
+						<xsd:enumeration value="OCT"/>
+						<xsd:enumeration value="NOV"/>
+						<xsd:enumeration value="DEC"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+            		        </xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="wblCargoDescComplexType">
+		<xsd:sequence dfdl:separator="%CR;%LF;/" dfdl:separatorPolicy="suppressed" dfdl:terminator="">
+            			<xsd:element dfdl:representation="text" name="mandDescAndDate" type="wblDescriptionAndDate"/>
+            <xsd:element dfdl:escapeSchemeRef="" dfdl:representation="text" maxOccurs="13" minOccurs="0" name="optionalDescription">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="1"/>
+						<xsd:maxLength value="35"/>
+						<xsd:pattern value="\w{1,35}"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+            		        </xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="weightComplexType">
+		<xsd:sequence>
+			<xsd:element dfdl:length="1" dfdl:lengthKind="explicit" dfdl:representation="text" name="weightCode">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<!--  dfdl:assert message="Must be K or L">{(. eq 'K') or (. eq 'L')}
+						</dfdl:assert -->
+					</xsd:appinfo>
+				</xsd:annotation>
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="1"/>
+						<xsd:maxLength value="1"/>
+						<xsd:enumeration value="K"/>
+						<xsd:enumeration value="L"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" name="weight" type="xsd:string"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="wblPiecesComplexType">
+		<xsd:sequence>
+			<xsd:element dfdl:length="1" dfdl:lengthKind="explicit" dfdl:representation="text" name="shipmentCode">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<!-- dfdl:assert message="Must be &quot;T&quot;">{. eq 'T'}</dfdl:assert -->
+					</xsd:appinfo>
+				</xsd:annotation>
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="1"/>
+						<xsd:maxLength value="1"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" name="numPieces" type="pieceCountSimpleType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="wblAirportComplexType">
+		<xsd:sequence>
+			<xsd:element dfdl:length="3" dfdl:lengthKind="explicit" dfdl:representation="text" name="origAirport">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="3"/>
+						<xsd:maxLength value="3"/>
+						<xsd:pattern value="[A-Z]{3}"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="destAirport">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="3"/>
+						<xsd:maxLength value="3"/>
+						<xsd:pattern value="[A-Z]{3}"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="friBodyComplexType">
+		<xsd:sequence dfdl:initiator="" dfdl:separator="" dfdl:terminator="">
+			<xsd:element dfdl:representation="text" dfdl:terminator="%CR;%LF;" name="messageType">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="3"/>
+						<xsd:maxLength value="3"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:terminator="" minOccurs="0" name="cargoControlLine" type="cclComplexType">
+
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="">{(fn:string-length(./airport ) eq 3) and (fn:string-length(./terminal ) le 4)}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" name="airWayBill" type="awbComplexType"/>
+			<xsd:element dfdl:representation="text" name="wayBill" type="wblComplexType"/>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="arrival" type="arrComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must be ARR">{./segmentId eq 'ARR'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+            			<xsd:element dfdl:representation="text" minOccurs="0" name="agent" type="agtComplexType">
+
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must be AGT">{./segmentId eq
+							'AGT'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+            <xsd:element dfdl:representation="text" minOccurs="0" name="cbpEntryDetails" type="cedComplexType">
+
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must be CED">{./segmentId eq
+							'CED'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>			
+						<xsd:element dfdl:representation="text" minOccurs="0" name="shipper" type="shpComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must start with SHP.">{./idAndName/segmentId
+							eq 'SHP'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="consignee" type="cneComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must start with CNE.">{./idAndName/segmentId
+							eq 'CNE'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="transfer" type="trnComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must starts with TRN.">{./segmentId eq
+							'TRN'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="shipmentDesc" type="csdComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must begins with CSD">{./segmentId eq
+							'CSD'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="fda" type="fdaComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must be FDA.">{./segmentId eq
+							'FDA'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+            		<xsd:element dfdl:representation="text" minOccurs="0" name="terminator" type="terminatorComplexType"/>
+        </xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="frcBodyComplexType">
+		<xsd:sequence dfdl:initiator="" dfdl:separator="" dfdl:terminator="">
+			<xsd:element dfdl:representation="text" dfdl:terminator="%CR;%LF;" name="messageType">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="3"/>
+						<xsd:maxLength value="3"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:terminator="" minOccurs="0" name="cargoControlLine" type="cclComplexType">
+
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator>{(fn:string-length(./airport ) eq 3) and
+							(fn:string-length(./terminal ) le 4)}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" name="airWayBill" type="awbComplexType"/>
+			<xsd:element dfdl:representation="text" name="wayBill" type="wblComplexType"/>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="arrival" type="arrComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must be ARR">{./segmentId eq
+							'ARR'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+            			<xsd:element dfdl:representation="text" minOccurs="0" name="agent" type="agtComplexType">
+
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must be AGT">{./segmentId eq
+							'AGT'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+            <xsd:element dfdl:representation="text" minOccurs="0" name="cbpEntryDetails" type="cedComplexType">
+
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must be CED">{./segmentId eq
+							'CED'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+						<xsd:element dfdl:representation="text" minOccurs="0" name="shipper" type="shpComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must start with SHP.">{./idAndName/segmentId
+							eq 'SHP'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="consignee" type="cneComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must start with CNE.">{./idAndName/segmentId
+							eq 'CNE'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="transfer" type="trnComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must starts with TRN.">{./segmentId eq
+							'TRN'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="shipmentDesc" type="csdComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must begins with CSD">{./segmentId eq
+							'CSD'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="fda" type="fdaComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must be FDA.">{./segmentId eq
+							'FDA'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" name="reason" type="rfaComplexType"/>
+            		<xsd:element dfdl:representation="text" minOccurs="0" name="terminator" type="terminatorComplexType"/>
+        </xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="fxxBodyComplexType">
+		<xsd:sequence dfdl:initiator="" dfdl:separator="" dfdl:terminator="">
+			<xsd:element dfdl:representation="text" dfdl:terminator="%CR;%LF;" name="messageType">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="3"/>
+						<xsd:maxLength value="3"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:terminator="" minOccurs="0" name="cargoControlLine" type="cclComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator>{(fn:string-length(./airport ) eq 3) and (fn:string-length(./terminal ) le 4)}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" name="airWayBill" type="awbComplexType"/>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="arrival" type="arrOtherComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must be ARR">{./segmentId eq
+							'ARR'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" name="reason" type="rfaComplexType"/>
+            		<xsd:element dfdl:representation="text" minOccurs="0" name="terminator" type="terminatorComplexType"/>
+        </xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="frxBodyComplexType">
+		<xsd:sequence dfdl:initiator="" dfdl:separator="" dfdl:terminator="">
+			<xsd:element dfdl:representation="text" dfdl:terminator="%CR;%LF;" name="messageType">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="3"/>
+						<xsd:maxLength value="3"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:terminator="" minOccurs="0" name="cargoControlLine" type="cclComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator>{(fn:string-length(./airport ) eq 3) and
+							(fn:string-length(./terminal ) le 4)}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" name="airWayBill" type="awbComplexType"/>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="arrival" type="arrOtherComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must be ARR">{./segmentId eq
+							'ARR'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" name="reason" type="rfaComplexType"/>
+            		<xsd:element dfdl:representation="text" minOccurs="0" name="terminator" type="terminatorComplexType"/>
+        </xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="fxiBodyComplexType">
+		<xsd:sequence dfdl:initiator="" dfdl:separator="" dfdl:terminator="">
+			<xsd:element dfdl:representation="text" dfdl:terminator="%CR;%LF;" name="messageType">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="3"/>
+						<xsd:maxLength value="3"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:terminator="" minOccurs="0" name="cargoControlLine" type="cclComplexType">
+
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator>{(fn:string-length(./airport ) eq 3) and (fn:string-length(./terminal ) le 4)}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" name="airWayBill" type="awbComplexType"/>
+			<xsd:element dfdl:representation="text" name="wayBill" type="wblComplexType"/>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="arrival" type="arrComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must be ARR">{./segmentId eq
+							'ARR'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="agent" type="agtComplexType">
+
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must be AGT">{./segmentId eq
+							'AGT'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="cbpEntryDetails" type="cedComplexType">
+
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must be CED">{./segmentId eq
+							'CED'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="shipper" type="shpComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must start with SHP.">{./idAndName/segmentId
+							eq 'SHP'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="consignee" type="cneComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must start with CNE.">{./idAndName/segmentId
+							eq 'CNE'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="transfer" type="trnComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must starts with TRN.">{./segmentId eq
+							'TRN'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="shipmentDesc" type="csdComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must begins with CSD">{./segmentId eq
+							'CSD'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="fda" type="fdaComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must be FDA.">{./segmentId eq
+							'FDA'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+            		<xsd:element dfdl:representation="text" minOccurs="0" name="terminator" type="terminatorComplexType"/>
+        </xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="fxcBodyComplexType">
+		<xsd:sequence dfdl:initiator="" dfdl:separator="" dfdl:terminator="">
+			<xsd:element dfdl:representation="text" dfdl:terminator="%CR;%LF;" name="messageType">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="3"/>
+						<xsd:maxLength value="3"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:terminator="" minOccurs="0" name="cargoControlLine" type="cclComplexType">
+
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator>{(fn:string-length(./airport ) eq 3) and
+							(fn:string-length(./terminal ) le 4)}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" name="airWayBill" type="awbComplexType"/>
+			<xsd:element dfdl:representation="text" name="wayBill" type="wblComplexType"/>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="arrival" type="arrComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must be ARR">{./segmentId eq
+							'ARR'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="agent" type="agtComplexType">
+
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must be AGT">{./segmentId eq
+							'AGT'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="cbpEntryDetails" type="cedComplexType">
+
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must be CED">{./segmentId eq
+							'CED'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="shipper" type="shpComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must start with SHP.">{./idAndName/segmentId
+							eq 'SHP'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="consignee" type="cneComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must start with CNE.">{./idAndName/segmentId
+							eq 'CNE'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="transfer" type="trnComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must starts with TRN.">{./segmentId eq
+							'TRN'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="shipmentDesc" type="csdComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must begins with CSD">{./segmentId eq
+							'CSD'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="fda" type="fdaComplexType">
+				<xsd:annotation>
+					<xsd:appinfo source="http://www.ogf.org/dfdl/">
+						<dfdl:discriminator message="Must be FDA.">{./segmentId eq
+							'FDA'}</dfdl:discriminator>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" name="reason" type="rfaComplexType"/>
+            		<xsd:element dfdl:representation="text" minOccurs="0" name="terminator" type="terminatorComplexType"/>
+        </xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="valueCurrencyComplexType">
+		<xsd:sequence dfdl:separator="-">
+			<xsd:element dfdl:representation="text" name="value">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="1"/>
+						<xsd:maxLength value="12"/>
+						<xsd:pattern value="\d{1,12}"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" name="currencyCode">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="3"/>
+						<xsd:maxLength value="3"/>
+						<xsd:pattern value="[A-Z]{3}"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="commodityCodeComplexType">
+		<xsd:sequence dfdl:initiator="" dfdl:separator="%CR;%LF;/" dfdl:separatorPolicy="suppressedAtEndLax" dfdl:terminator="">
+			<xsd:element dfdl:representation="text" dfdl:textTrimKind="none" maxOccurs="10" minOccurs="0" name="commodityCode">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="10"/>
+						<xsd:maxLength value="10"/>
+						<xsd:pattern value="\d{10}"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:simpleType name="valueCurrencySimpleType">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="\d{1,12}-[A-Z]{3}"/>
+			<xsd:maxLength value="16"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:element ibmSchExtn:docRoot="true" name="airManifestMessage" type="airCamirMessage"/>
+	      
+	<!--  xsd:element ibmSchExtn:docRoot="true" name="cedtry" type="fxiBodyComplexType"/ -->
+
+	<xsd:complexType name="headerComplexType">
+		<xsd:sequence>
+			<xsd:element dfdl:initiator="%CR;%LF;%SOH;" dfdl:representation="text" dfdl:terminator="%CR;%LF;." name="origAddress">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="1"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:initiator="" dfdl:lengthKind="delimited" dfdl:representation="text" dfdl:terminator="%CR;%LF;" name="originator">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="8"/>
+						<xsd:maxLength value="8"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+
+
+
+	<xsd:complexType name="iataOutboundHeaderComplexType">
+		<xsd:sequence>
+			<xsd:element dfdl:initiator="%CR;%LF;%SOH;" dfdl:representation="text" dfdl:terminator="%CR;%LF;." name="originator">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="1"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:terminator="" name="addressAndTime" type="OrigAddressOutBoundComplexType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="arIncOutboundHeaderComplexType">
+		<xsd:sequence>
+			<xsd:element dfdl:initiator="%CR;%LF;%SOH;QK%SP;" dfdl:representation="text" dfdl:terminator="%CR;%LF;." name="originator">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="1"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" name="addressAndTime" type="OrigAddressOutBoundComplexType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="csdComplexType">
+		<xsd:sequence dfdl:initiator="" dfdl:separator="/" dfdl:separatorPolicy="suppressedAtEndLax" dfdl:separatorPosition="infix" dfdl:terminator="%CR;%LF;">
+			<xsd:element dfdl:representation="text" name="segmentId" type="xsd:string"/>
+			<xsd:element dfdl:initiator="" dfdl:terminator="" minOccurs="0" name="origCountry">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:maxLength value="2"/>
+						<xsd:pattern value="\w{0,2}"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:initiator="" dfdl:length="3" dfdl:lengthKind="delimited" dfdl:representation="text" name="valueCurrency" type="valueCurrencyComplexType">
+			</xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="codes" type="commodityCodeComplexType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="trnComplexType">
+		<xsd:sequence dfdl:separator="/" dfdl:terminator="%CR;%LF;">
+			<xsd:element dfdl:representation="text" name="segmentId">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="3"/>
+						<xsd:maxLength value="3"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" name="airport" type="trnAirportComplexType"/>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="bondedIdOrCarrier" type="xsd:string">
+        <xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            
+          </xsd:appinfo>
+        </xsd:annotation>
+      </xsd:element>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="premisesIdenOrInBondNumber" type="xsd:string">
+        <xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            
+          </xsd:appinfo>
+        </xsd:annotation>
+      </xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:simpleType name="postalCodeSimpleType">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="9"/>
+			<xsd:pattern value="\w{1,9}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType dfdl:length="2" dfdl:lengthKind="explicit" name="countrySimpleType">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="2"/>
+			<xsd:maxLength value="2"/>
+			<xsd:pattern value="\w{2}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="stateSimpleType">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="9"/>
+			<xsd:pattern value="\w{1,9}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="citySimpleType">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="17"/>
+			<xsd:pattern value="\w{1,17}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="streetSimpleType">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="35"/>
+			<xsd:pattern value="\w{1,35}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="phoneSimpleType">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="14"/>
+			<xsd:pattern value="\w{1,14}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="nameSimpleType">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="35"/>
+			<xsd:pattern value="\w{1,35}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:complexType dfdl:terminator="%CR;%LF;" name="cneComplexType">
+		<xsd:sequence dfdl:separator="%CR;%LF;/" dfdl:terminator="%CR;%LF;">
+			<xsd:element dfdl:escapeSchemeRef="" dfdl:representation="text" name="idAndName" type="shipperNameComplexType"/>
+			<xsd:element dfdl:escapeSchemeRef="" dfdl:representation="text" minOccurs="0" name="street" type="streetSimpleType"/>
+			<xsd:element dfdl:escapeSchemeRef="" dfdl:representation="text" name="cityState" type="cityStateComplexType"/>
+			<xsd:element dfdl:escapeSchemeRef="" dfdl:representation="text" name="countryPostalPhone" type="countryPostalPhoneComplexType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="shpComplexType">
+		<xsd:sequence dfdl:separator="%CR;%LF;/" dfdl:separatorPolicy="suppressedAtEndLax" dfdl:terminator="%CR;%LF;">
+			<xsd:element dfdl:escapeSchemeRef="" dfdl:representation="text" name="idAndName" type="shipperNameComplexType"/>
+			<xsd:element dfdl:escapeSchemeRef="" dfdl:representation="text" minOccurs="0" name="street" type="streetSimpleType"/>
+			<xsd:element dfdl:escapeSchemeRef="" dfdl:representation="text" name="cityState" type="cityStateComplexType"/>
+			<xsd:element dfdl:escapeSchemeRef="" dfdl:representation="text" name="countryPostal" type="countryPostalPhoneComplexType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="agtComplexType">
+		<xsd:sequence dfdl:separator="/" dfdl:terminator="%CR;%LF;">
+			<xsd:element dfdl:representation="text" name="segmentId">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="3"/>
+						<xsd:maxLength value="3"/>
+						<xsd:pattern value="(AGT)"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:initiator="" dfdl:representation="text" dfdl:terminator="" name="participantCode">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="2"/>
+						<xsd:maxLength value="7"/>
+						<xsd:pattern value="\w{2,7}"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:simpleType dfdl:textNumberPattern="#0.0##" name="weightSimpleType">
+		<xsd:restriction base="xsd:float">
+			<xsd:minInclusive value="0"/>
+			<xsd:maxInclusive value="9999999.99"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType dfdl:textNumberPattern="#0" name="pieceCountSimpleType">
+		<xsd:restriction base="xsd:integer">
+			<xsd:maxInclusive value="99999"/>
+			<xsd:minExclusive value="0"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType dfdl:length="1" dfdl:lengthKind="explicit" name="weightCodeSimpleType">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="1"/>
+			<xsd:enumeration value="K"/>
+			<xsd:enumeration value="L"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:complexType name="arrOtherComplexType">
+		<xsd:sequence dfdl:separator="/" dfdl:terminator="%CR;%LF;">
+			<xsd:element dfdl:lengthKind="delimited" dfdl:representation="text" name="segmentId">
+                <xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="3"/>
+						<xsd:maxLength value="3"/>
+						<xsd:pattern value="(ARR)"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:initiator="" dfdl:representation="text" dfdl:terminator="" name="carrierAndFlight">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="5"/>
+						<xsd:maxLength value="8"/>
+						<xsd:pattern value="\w{2,3}\d{3}\d{0,1}[A-Z]{0,1}"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" name="arrival" type="arrivalSplitComplexType"/>
+            								                    </xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="arrComplexType">
+		<xsd:sequence dfdl:separator="/" dfdl:terminator="%CR;%LF;">
+			<xsd:element dfdl:lengthKind="delimited" dfdl:representation="text" name="segmentId">
+                <xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="3"/>
+						<xsd:maxLength value="3"/>
+						<xsd:pattern value="(ARR)"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:initiator="" dfdl:representation="text" dfdl:terminator="" name="carrierAndFlight">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="5"/>
+						<xsd:maxLength value="8"/>
+						<xsd:pattern value="\w{2,3}\d{3}\d{0,1}[A-Z]{0,1}"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:representation="text" name="arrival" type="arrivalSplitComplexType"/>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="pieces" type="boardedPieceComplexType"/>
+			<xsd:element dfdl:representation="text" minOccurs="0" name="weight" type="weightComplexType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:simpleType name="arrivalDateSimpleType">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="0"/>
+			<xsd:maxLength value="9999"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType dfdl:length="3" dfdl:lengthKind="explicit" name="airportSimpleType">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="3"/>
+			<xsd:maxLength value="3"/>
+			<xsd:pattern value="\w{3}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:complexType name="wblComplexType">
+		<xsd:sequence dfdl:separator="/" dfdl:terminator="%CR;%LF;">
+			<xsd:element dfdl:representation="text" name="segmentId" type="xsd:string">
+        <xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:assert message="Must be WBL">{. eq 'WBL'}</dfdl:assert>
+          </xsd:appinfo>
+        </xsd:annotation>
+      </xsd:element>
+			<xsd:element dfdl:representation="text" name="airports" type="wblAirportComplexType"/>
+			<xsd:element dfdl:representation="text" name="pieces" type="wblPiecesComplexType"/>
+			<xsd:element dfdl:representation="text" name="weight" type="weightComplexType"/>
+            			                        <xsd:element dfdl:representation="text" minOccurs="1" name="description" type="wblCargoDescComplexType"/>
+                        			                        		                </xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="hawbComplexType">
+		<xsd:sequence dfdl:separator="/" dfdl:terminator="">
+			<xsd:element dfdl:representation="text" dfdl:terminator="" minOccurs="0" name="hawbNumber">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="0"/>
+						<xsd:maxLength value="9999"/>
+											</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:initiator="" dfdl:representation="text" minOccurs="0" name="packageId">
+                				<xsd:annotation>
+          <xsd:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:assert message="No package id for Master">{../hawbNumber ne 'M'}</dfdl:assert>
+          </xsd:appinfo>
+        </xsd:annotation>
+                <xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="0"/>
+						<xsd:maxLength value="9999"/>
+											</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="awbOtherComplexType">
+		<xsd:sequence dfdl:separator="-" dfdl:separatorPolicy="suppressedAtEndLax" dfdl:terminator="%CR;%LF;">
+			<xsd:element dfdl:length="3" dfdl:lengthKind="delimited" dfdl:representation="text" name="awbPrefix">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="3"/>
+						<xsd:maxLength value="3"/>
+						<xsd:pattern value="\w{3}"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:initiator="" dfdl:lengthKind="delimited" dfdl:representation="text" name="awbSerial">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="8"/>
+						<xsd:maxLength value="8"/>
+						<xsd:pattern value="\d{8}"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+
+            					<xsd:element dfdl:representation="text" minOccurs="0" name="hawbNumber">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="12"/>
+            <xsd:pattern value="\w{1,12}"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:element>
+            <xsd:element dfdl:representation="text" minOccurs="0" name="splitIndicator">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="1"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:element>
+        </xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="awbComplexType">
+		<xsd:sequence dfdl:separator="-" dfdl:separatorPolicy="suppressedAtEndLax" dfdl:terminator="%CR;%LF;">
+			<xsd:element dfdl:length="3" dfdl:lengthKind="delimited" dfdl:representation="text" name="awbPrefix">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="0"/>
+						<xsd:maxLength value="9999"/>
+											</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element dfdl:initiator="" dfdl:lengthKind="delimited" dfdl:representation="text" name="awbSerial">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:minLength value="0"/>
+						<xsd:maxLength value="9999"/>
+											</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+
+			<xsd:element dfdl:representation="text" minOccurs="0" name="masterIndOrHawbNum" type="hawbComplexType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="cclComplexType">
+		<xsd:sequence dfdl:terminator="%CR;%LF;">
+			<xsd:element dfdl:representation="text" name="airport" type="airportSimpleType"/>
+			<xsd:element dfdl:lengthKind="delimited" dfdl:representation="text" dfdl:terminator="" name="terminal">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:maxLength value="4"/>
+						<xsd:minLength value="2"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<!-- <xsd:annotation> <xsd:appinfo source="http://www.ogf.org/dfdl/"> <dfdl:format 
+		alignment="1" initiator="" trailingSkip="0" separator="" textPadKind="none" 
+		textTrimKind="none" textBidi="no" leadingSkip="0" floating="no" alignmentUnits="bytes" 
+		byteOrder="bigEndian" encoding="ASCII" fillByte="1" ignoreCase="no" initiatedContent="no" 
+		lengthKind="implicit" lengthUnits="characters" representation="text" sequenceKind="ordered" 
+		terminator="%CR;%LF;"/> </xsd:appinfo> </xsd:annotation> -->
+	<xsd:annotation>
+		<xsd:appinfo source="http://www.ogf.org/dfdl/">
+			<dfdl:format ignoreCase="no" ref="ibmEdiFmt:EDIFormat"/>
+		</xsd:appinfo>
+	</xsd:annotation>
+    <xsd:complexType name="liftOffComplexType">
+    <xsd:sequence>
+      <xsd:element dfdl:representation="text" minOccurs="1" name="liftOffDate" type="arrivalDateComplexType"/>
+      <xsd:element dfdl:representation="text" minOccurs="1" name="liftOffTime">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+            <xsd:minLength value="4"/>
+            <xsd:maxLength value="4"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

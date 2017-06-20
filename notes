@@ -1,0 +1,33 @@
+
+In the .pom file, <artifactId>air-manifest-micro</artifactId> must be all lower-case and separated by hyphens.
+If it is not, the image will fail to build and you will get an http 500 error.
+
+After building the jar file, build the docker image.
+
+To build the image:
+yeti:cbp-cspd-prototype chrismoran$ ./mvnw package docker:build
+
+To start the image:
+yeti:cbp-cspd-prototype chrismoran$ docker run -p 8080:8080 -t csra/air-manifest-micro
+
+The -v option enables docker to find the credentials file in the .aws folder to the docker image
+yeti:cbp-cspd-prototype chrismoran$ docker run -it --rm -p 8080:8080 -v ~/.aws:/root/.aws csra/air-manifest-micro
+
+To see docker images:
+yeti:cbp-cspd-prototype chrismoran$ docker images
+REPOSITORY                   TAG                 IMAGE ID            CREATED             SIZE
+csra/air-manifest-micro      latest              38cb1482ca6e        5 seconds ago       205 MB
+<none>                       <none>              d20b86c93fd4        15 minutes ago      195 MB
+<none>                       <none>              a48290f4e844        18 minutes ago      195 MB
+<none>                       <none>              a9a116ef2451        About an hour ago   195 MB
+frolvlad/alpine-oraclejdk8   slim                83b387a3b515        9 days ago          166 MB
+
+To see containers currently running:
+yeti:cbp-cspd-prototype chrismoran$ docker ps
+CONTAINER ID        IMAGE                     COMMAND                  CREATED             STATUS              PORTS                    NAMES
+e988a2d1af74        csra/air-manifest-micro   "sh -c 'java $JAVA..."   31 seconds ago      Up 30 seconds       0.0.0.0:8080->8080/tcp   gallant_chandrasekhar
+
+To stop a container:
+yeti:cbp-cspd-prototype chrismoran$ docker stop e988a2d1af74
+
+
